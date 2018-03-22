@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>木桶布局</title>
+	<meta charset="UTF-8" />
+<style>
+header{
+	margin:0 auto;
+	width:400px;
+}
+header > input {
+	width:400px;
+	height:32px;
+	line-height: 32px;
+	font-size: 18px;
+}
+main {
+	width:1200px;
+	margin:0 auto;
+}
+.img-row {
+	margin:0px;
+}
+.img-row:after{
+	content: '';
+	display: block;
+	clear: both;
+}
+.img-ct{
+	float:left;
+}
+.img-ct img{
+	height: 100%;
+}
+</style>
+</head>
+<body>
+
+<main>
+
+</main>
+	
+</main>
+<script src="http://apps.bdimg.com/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+	function Barrel($ct){
+ 		this.$ct = $ct;
+ 		this.rowList = [];
+ 		this.loadImg();
+	}
+
+	Barrel.prototype = {
+		loadImg : function(){
+			var imgs = this.getImgUrls(20);
+			var _this = this;
+			for (var i = 0; i < imgs.length; i++) {
+				let img = new Image();
+				img.src = imgs[i];
+				img.onload = function () {
+				    var imgInfo = {
+				        target : img,
+				  		width : 200 * (img.width/img.height),
+						height: 200
+					};
+					_this.render(imgInfo);
+                }
+			}
+		},
+		getImgUrls:function(num){
+			var color,width,height,urls = [];
+			for(let i = 0;i < num;i++){
+				color = Math.random().toString(16).substring(3,9);
+				width = Math.floor(Math.random()*100+100);
+				height = Math.floor(Math.random()*100+75);
+				urls.push('http://placehold.it/'+width+'x'+height+'/'+color+'/fff');
+			}
+			return urls;
+		} ,
+		render: function(imgInfo){
+		    var clientWidth = this.$ct.width();
+		    var rowWidth = 0;
+		    var rowHeight = 0;
+
+			this.rowList.push(imgInfo);
+			for(var i=0;i<this.rowList.length;i++){
+			    rowWidth += this.rowList[i].width;
+			    if(rowWidth >= (clientWidth)){
+					rowHeight = (clientWidth*200)/(rowWidth-this.rowList.pop().width);
+					this.layout(rowHeight);
+					this.rowList = [imgInfo];
+                    rowWidth = 0;
+				}
+			}
+		},
+		layout: function(rowHeight){
+		    console.log('createRow');
+		    var $rowCt = $("<div class='img-row'><div>");
+		    $.each(this.rowList,function(idx,imgInfo){
+		        console.log(this.rowList);
+		    	var $imgCt = $("<div class='img-ct'><div>");
+		    	$img = $(imgInfo.target);
+			    $img.height(rowHeight);
+			    console.log($img);
+			    $imgCt.append($img);
+                $rowCt.append($imgCt);
+		    });
+            this.$ct.append($rowCt);
+		}    
+	};
+
+	new Barrel($('main'))
+</script>
+</body>
+</html>
